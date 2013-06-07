@@ -91,7 +91,9 @@ public final class ThresholdCrossingDetector
             return false;
         }
         
-        log_.debug(String.format("Average host utilization is: %s", hostUtilization));                       
+        log_.debug(String.format("Average host utilization + temperature is: %s", hostUtilization)); 
+        log_.debug(String.format("UtilizationData : %s", hostUtilization));   
+        
         boolean isDetected = startThresholdCrossingDetection(hostUtilization, monitoringData);
         return isDetected;
     }
@@ -240,6 +242,10 @@ public final class ThresholdCrossingDetector
                                      virtualMachineUtilization));
             hostUtilization = MathUtils.addVectors(hostUtilization, virtualMachineUtilization);
         }
+        
+        
+        double cpuTemp = CpuTemperature.getTemperature();
+        hostUtilization.add(cpuTemp);
         
         return hostUtilization;
     }

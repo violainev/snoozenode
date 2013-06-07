@@ -86,4 +86,16 @@ public final class UtilizationUtils
         Guard.check(vector);
         return vector.get(Globals.NETWORK_TX_UTILIZATION_INDEX);
     }
+    
+    /**
+     * Returns Cpu temperature information.
+     * 
+     * @param vector    The vector
+     * @return          The temperature
+     */
+    public static double getCpuTemperature(List<Double> vector)
+    {
+        Guard.check(vector);
+        return vector.get(Globals.CPU_TEMPERATURE_INDEX);
+    }
 }
