@@ -14,7 +14,7 @@ public class CpuTemperature
     {        
         Runtime r = Runtime.getRuntime();
         String f, temp;
-        f = "sensors";
+        f = "sensors -u";
         double temperature = 0.0;
         
         int nbTemp = 0;
@@ -29,12 +29,12 @@ public class CpuTemperature
 	        
 	        while((temp = pin.readLine()) != null)
             {
-                Pattern pat = Pattern.compile("\\+([^C])*C");
+                Pattern pat = Pattern.compile("temp[0-9]+_input:.*");
 
                 Matcher m = pat.matcher(temp);
                 if (m.find())
                 {
-                    Pattern pat2 = Pattern.compile("[0-9]+(.[0-9]+)?");
+                    Pattern pat2 = Pattern.compile("[0-9]+(.[0-9]+)+");
                     Matcher m2 = pat2.matcher(m.group(0));
 
                     if (m2.find())
