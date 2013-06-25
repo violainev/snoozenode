@@ -36,7 +36,9 @@ public final class MonitoringThresholds
 
     /** The network utilization thresholds. */
     private List<Double> network_;
-        
+
+    /** The cpu temperature threshold. */
+    private double temperature_;
     /**
      * Memory thresholds.
      *  
@@ -44,11 +46,12 @@ public final class MonitoringThresholds
      * @param memory   The memory utilization thresholds
      * @param network  The network utilization thresholds
      */
-    public MonitoringThresholds(List<Double> cpu, List<Double> memory, List<Double> network) 
+    public MonitoringThresholds(List<Double> cpu, List<Double> memory, List<Double> network, double temperature) 
     {
         cpu_ = cpu;
         memory_ = memory;
         network_ = network;
+        temperature_ = temperature;
     }
 
     /**
@@ -79,5 +82,16 @@ public final class MonitoringThresholds
     public List<Double> getNetwork() 
     {
         return network_;
+    }
+    
+
+    /**
+     * Returns the cpu temperature thresholds.
+     * 
+     * @return      The cpu temperature thresholds
+     */
+    public double getTemperature() 
+    {
+        return temperature_;
     }
 }

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class CpuTemperature
 {
     /** Define the logger. */
-    private static final Logger log_ = LoggerFactory.getLogger(ThresholdCrossingDetector.class);
+    private static final Logger log_ = LoggerFactory.getLogger(CpuTemperature.class);
     
     public static double getTemperature()
     {        

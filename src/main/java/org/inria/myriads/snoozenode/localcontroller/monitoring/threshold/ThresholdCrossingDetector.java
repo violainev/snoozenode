@@ -132,11 +132,20 @@ public final class ThresholdCrossingDetector
                                  networkTxUtilization,
                                  cpuTemperature));
         
+        boolean isOverheated = detectOverheatSituation(cpuTemperature);
+        
+        if (isOverheated)
+        {
+        	log_.debug("OVERHEATED situation detected!");
+        	monitoringData.setState(LocalControllerState.OVERHEATED);
+        	return true;
+        }
+        
+        
         boolean isOverloaded = detectOverloadSituation(cpuUtilization, 
                                                        memoryUtilization, 
                                                        networkRxUtilization, 
-                                                       networkTxUtilization,
-                                                       cpuTemperature);
+                                                       networkTxUtilization);
         if (isOverloaded)
         {
             log_.debug("OVERLOAD situation detected!");
@@ -157,6 +166,31 @@ public final class ThresholdCrossingDetector
         
         return false;        
     }
+    
+    /**
+     * Checks thresholds for overheat situation.
+     *  
+     * @param cpuTemperature            The CPU temperature
+     */
+    private boolean detectOverheatSituation(double cpuTemperature)
+    {
+        Guard.check(cpuTemperature);        
+
+        double thresh = monitoringThresholds_.getTemperature();
+ 
+        if (cpuTemperature >= thresh)
+        {
+        	log_.debug(String.format("CPU OVERHEATED! %f >= %f", cpuTemperature, thresh));
+            return true;
+        }
+        else
+        {
+        	log_.debug(String.format("CPU OK %f <= %f", cpuTemperature, thresh));
+        	return false;
+        }
+
+    }
+    
     
     /**
      * Checks thresholds for underload situation.
@@ -202,10 +236,9 @@ public final class ThresholdCrossingDetector
     private boolean detectOverloadSituation(double cpuUtilization, 
                                             double memoryUtilization,
                                             double networkRxUtilization,
-                                            double networkTxUtilization,
-                                            double cpuTemperature)
+                                            double networkTxUtilization)
     {
-        Guard.check(cpuUtilization, memoryUtilization, networkRxUtilization, networkTxUtilization, cpuTemperature);        
+        Guard.check(cpuUtilization, memoryUtilization, networkRxUtilization, networkTxUtilization);        
         boolean cpuOverload = cpuUtilization >
                               ThresholdUtils.getMaxThreshold(monitoringThresholds_.getCPU());
         boolean memoryOverload = memoryUtilization >
@@ -214,17 +247,11 @@ public final class ThresholdCrossingDetector
                                     ThresholdUtils.getMaxThreshold(monitoringThresholds_.getNetwork());
         boolean networkTxOverload = networkTxUtilization > 
                                     ThresholdUtils.getMaxThreshold(monitoringThresholds_.getNetwork());
-        boolean cpuOverheated = cpuTemperature >= 42.00;
 
-        if (cpuOverload || memoryOverload || networkRxOverload || networkTxOverload || cpuOverheated)
+        if (cpuOverload || memoryOverload || networkRxOverload || networkTxOverload)
         {
-        	if (cpuOverheated)
-        	{
-        		log_.debug("CPU OVERHEATED!");
-        	}
             return true;
         }
-        
         
         return false;
     }

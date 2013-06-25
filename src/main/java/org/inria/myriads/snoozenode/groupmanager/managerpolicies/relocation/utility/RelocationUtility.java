@@ -110,6 +110,18 @@ public final class RelocationUtility
                         return null;
                     }
                     break;
+
+                case OVERHEATED :
+                   localController = EstimatorUtils.findSuitableLocalController(candidateVirtualMachine, 
+                                                                                destinationLocalControllers,
+                                                                                estimator);
+                    if (localController == null)
+                    {
+                        log_.debug("No local controller with enough capacity could be detected!");
+                        continue;
+                    }
+                    break;
+                    
                     
                 default:
                     log_.error(String.format("Unknown local controller state: %s!", state));

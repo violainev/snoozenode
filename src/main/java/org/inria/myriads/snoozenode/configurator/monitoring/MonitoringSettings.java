@@ -37,6 +37,9 @@ public final class MonitoringSettings
     
     /** Monitoring thresholds. */
     private MonitoringThresholds thresholds_;
+    
+    /** Temperature threshold. */    
+    private double temperatureThreshold_;
      
     /**
      * Sets the number of monitoring entries.
@@ -116,5 +119,25 @@ public final class MonitoringSettings
     public MonitoringThresholds getThresholds()
     {
         return thresholds_;
+    } 
+    
+    /**
+     * Sets the temperature threshold.
+     * 
+     * @param thresholds      The temperature threshold
+     */
+    public void setTemperatureThreshold(double temperatureThreshold)
+    {
+    	temperatureThreshold_ = temperatureThreshold;
+    }
+    
+    /**
+     * Returns the temperature threshold.
+     * 
+     * @return      The temperature threshold
+     */
+    public double getTemperatureThreshold()
+    {
+        return temperatureThreshold_;
     }
 }

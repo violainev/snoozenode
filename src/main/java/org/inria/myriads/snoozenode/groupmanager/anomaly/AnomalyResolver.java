@@ -59,6 +59,9 @@ public final class AnomalyResolver
     /** Underload relocation policy. */
     private VirtualMachineRelocation underloadRelocationPolicy_;
     
+    /** Overerheat relocation policy. */
+    private VirtualMachineRelocation overheatRelocationPolicy_;
+    
     /** The group manager repository. */
     private GroupManagerRepository groupManagerRepository_;
 
@@ -93,6 +96,10 @@ public final class AnomalyResolver
         underloadRelocationPolicy_ = 
             GroupManagerPolicyFactory.newVirtualMachineRelocation(relocationPolicies.getUnderloadPolicy(),
                                                                   resourceDemandEstimator);      
+        overheatRelocationPolicy_ = 
+            GroupManagerPolicyFactory.newVirtualMachineRelocation(relocationPolicies.getOverheatPolicy(),
+                                                                      resourceDemandEstimator);
+        
         numberOfMonitoringEntries_ = resourceDemandEstimator.getNumberOfMonitoringEntries();
         groupManagerRepository_ = groupManagerRepository;
         stateMachine_ = stateMachine;
@@ -125,6 +132,12 @@ public final class AnomalyResolver
                 relocationPlan = underloadRelocationPolicy_.relocateVirtualMachines(anomalyLocalController,
                                                                                     destinationLocalControllers);
                 break;
+                
+            case OVERHEATED:
+                relocationPlan = overheatRelocationPolicy_.relocateVirtualMachines(anomalyLocalController,
+                                                                                   destinationLocalControllers);
+                break;
+                
             default:
                 log_.error(String.format("Unsupported state: %s", localControllerState));
                 break;     
@@ -144,7 +157,7 @@ public final class AnomalyResolver
         log_.debug(String.format("Returning %s local controllers", state));
         
         List<LocalControllerDescription> destination;
-        if (state.equals(LocalControllerState.OVERLOADED))
+        if (state.equals(LocalControllerState.OVERLOADED) || state.equals(LocalControllerState.OVERHEATED))
         {
             log_.debug("Getting all local controllers (including PASSIVE)");
             destination = groupManagerRepository_.getLocalControllerDescriptions(numberOfMonitoringEntries_, false);    

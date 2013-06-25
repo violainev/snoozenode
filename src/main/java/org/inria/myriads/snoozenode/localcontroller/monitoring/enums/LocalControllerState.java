@@ -32,4 +32,6 @@ public enum LocalControllerState
     OVERLOADED,
     /** Underloaded. */
     UNDERLOADED,
+    /** Overheated. */
+    OVERHEATED,
 }

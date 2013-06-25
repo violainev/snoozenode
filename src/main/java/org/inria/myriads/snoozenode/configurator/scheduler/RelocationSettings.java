@@ -34,6 +34,9 @@ public class RelocationSettings
     /** Underload relocation policy. */
     private Relocation underloadPolicy_;
     
+    /** Overheat relocation policy. */
+    private Relocation overheatPolicy_;
+    
     /**
      * Sets the overload relocation policy.
      * 
@@ -55,6 +58,16 @@ public class RelocationSettings
     }
     
     /**
+     * Sets the overheatPolicy relocation policy.
+     * 
+     * @param overheatPolicy  The overheatPolicy relocation policy
+     */
+    public void setOverheatPolicy(Relocation overheatPolicy) 
+    {
+    	overheatPolicy_ = overheatPolicy;
+    }
+    
+    /**
      * Returns the overload relocation policy.
      * 
      * @return      The overload relocation policy
@@ -72,5 +85,15 @@ public class RelocationSettings
     public Relocation getUnderloadPolicy() 
     {
         return underloadPolicy_;
+    }
+
+    /**
+     * Returns the virtual machine overheat relocation policy.
+     * 
+     * @return      The virtual machine overheat relocation policy
+     */
+    public Relocation getOverheatPolicy() 
+    {
+        return overheatPolicy_;
     }
 }

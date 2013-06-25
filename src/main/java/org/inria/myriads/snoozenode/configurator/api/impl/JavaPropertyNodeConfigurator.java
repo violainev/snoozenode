@@ -323,10 +323,17 @@ public final class JavaPropertyNodeConfigurator
         tmpUtilizationThresholds = getProperty("monitoring.thresholds.network");
         List<Double> networkUtilizationThresholds = StringUtils.convertStringToDoubleArray(tmpUtilizationThresholds, 
                                                                                            separator);        
+ 
+
+        double temperatureThreshold = Double.parseDouble(getProperty("monitoring.thresholds.temperature"));
+        
+        
         MonitoringThresholds monitoringThresholds = new MonitoringThresholds(cpuThresholds,
-                                                                             memoryUtilizationThresholds,
-                                                                             networkUtilizationThresholds);
+                memoryUtilizationThresholds,
+                networkUtilizationThresholds,
+                temperatureThreshold);
         monitoringSettings.setThresholds(monitoringThresholds);
+        
     }
     
     /**
@@ -390,6 +397,9 @@ public final class JavaPropertyNodeConfigurator
                 
         String underloadPolicy = getProperty("groupManagerScheduler.relocation.underloadPolicy");   
         groupManager.getRelocationSettings().setUnderloadPolicy(Relocation.valueOf(underloadPolicy));
+
+        String overheatPolicy = getProperty("groupManagerScheduler.relocation.overheatPolicy");   
+        groupManager.getRelocationSettings().setOverheatPolicy(Relocation.valueOf(overheatPolicy));
         
         String isEnabled = getProperty("groupManagerScheduler.reconfiguration.enabled"); 
         groupManager.getReconfigurationSettings().setEnabled(Boolean.valueOf(isEnabled));
