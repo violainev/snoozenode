@@ -170,7 +170,6 @@ public final class VirtualMachineMonitorDataConsumer
         {
             log_.debug("No threshold crossing detected! Node seems stable for now!");
         }
-        
         log_.debug("Sending aggregated local controller summary information to group maanger");
         //send(localControllerData); 
         globalQueue_.add(localControllerData);

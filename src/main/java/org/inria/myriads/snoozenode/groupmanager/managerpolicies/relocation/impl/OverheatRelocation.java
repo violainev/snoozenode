@@ -20,11 +20,16 @@
 package org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
+import org.inria.myriads.snoozecommon.datastructure.LRUCache;
 import org.inria.myriads.snoozecommon.guard.Guard;
+import org.inria.myriads.snoozecommon.metric.Metric;
 import org.inria.myriads.snoozenode.groupmanager.estimator.ResourceDemandEstimator;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.reconfiguration.ReconfigurationPlan;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.VirtualMachineRelocation;
@@ -35,15 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Most loaded server relocation policy.
+ * Overheat relocation policy.
  * 
  * @author Eugen Feller
  */
-public final class GreedyUnderloadRelocation 
+public final class OverheatRelocation 
     implements VirtualMachineRelocation 
 {
     /** Define the logger. */
-    private static final Logger log_ = LoggerFactory.getLogger(GreedyUnderloadRelocation.class);
+    private static final Logger log_ = LoggerFactory.getLogger(OverheatRelocation.class);
     
     /** Resource demand estimator. */
     private ResourceDemandEstimator estimator_;
@@ -53,10 +58,11 @@ public final class GreedyUnderloadRelocation
      * 
      * @param estimator     The resource demand estimator
      */
-    public GreedyUnderloadRelocation(ResourceDemandEstimator estimator)
+    public OverheatRelocation(ResourceDemandEstimator estimator)
     {
         Guard.check(estimator);
         estimator_ = estimator;
+        log_.debug("Overheat relocation policy started");
     }
     
     /**
@@ -70,15 +76,63 @@ public final class GreedyUnderloadRelocation
                                                  List<LocalControllerDescription> destinationLocalControllers)
     {
         Guard.check(sourceLocalController, destinationLocalControllers);
-        log_.debug(String.format("Starting to compute the migration plan for local controller: %s", 
-                                 sourceLocalController.getId()));
+        log_.debug(String.format("Overheat detected local controller: %s", 
+                sourceLocalController.getId()));
+        log_.debug(String.format("Starting to compute the migration plan for local controller: %s (%s)", 
+                                 sourceLocalController.getHostname(),sourceLocalController.getId()));
                 
         List<VirtualMachineMetaData> candidatevirtualMachines = 
             new ArrayList<VirtualMachineMetaData>(sourceLocalController.getVirtualMachineMetaData().values());
         SortUtils.sortVirtualMachinesDecreasing(candidatevirtualMachines, estimator_);
-        SortUtils.sortLocalControllersDecreasing(destinationLocalControllers, estimator_);
+        
+        List<VirtualMachineMetaData> vmToMigrate = new ArrayList<VirtualMachineMetaData>();
+        vmToMigrate.add(candidatevirtualMachines.get(0));
+        
+        log_.debug(String.format("Migrate VM : %s",candidatevirtualMachines.get(0).getIpAddress()));
+        
+        log_.debug("Other LC temperatures :");
+        for (LocalControllerDescription lcd : destinationLocalControllers)
+        {
+        	
+        	log_.debug(String.format("LC %s", lcd.getHostname()));
+        	
+        	Map<String,LRUCache<Long,Metric>> aggMetrics = lcd.getMetricData();
+        	
+        	/** debug **/
+        	StringBuffer sb = new StringBuffer();
+        	for ( Entry<String, LRUCache<Long, Metric>> entry  : aggMetrics.entrySet())
+            {
+	       		 sb.append("* " + entry.getKey() + " *  : { ");
+	       		 LRUCache<Long, Metric> metrics = entry.getValue();
+	       		 for ( Entry<Long,Metric> ent : metrics.entrySet() )
+	       		 {
+	       			 sb.append( ent.getValue() + "  ");
+	       		 }
+	       		 sb.append("}");
+            }	
+        	log_.debug(String.format("%s",sb.toString()));
+        	/** **/
+        	
+        }
+        
+        
+        SortUtils.sortLocalControllersIncreasingTemperature(destinationLocalControllers, estimator_, false);
+        
+        log_.debug("AFTER SORTING :");
+        for (LocalControllerDescription lcd : destinationLocalControllers)
+        {
+        	log_.debug(String.format("- %s", lcd.getHostname()));
+        }
+        
+        // check if it is the coldest..
+        if (destinationLocalControllers.get(0).getId().equals(sourceLocalController.getId()))
+        {
+        	log_.debug("Coldest node... Nothing to do....");
+        	return null;
+        }
+        
         ReconfigurationPlan reconfigurationPlan = 
-                RelocationUtility.computeReconfigurationPlan(candidatevirtualMachines,
+                RelocationUtility.computeReconfigurationPlan(vmToMigrate,
                                                              destinationLocalControllers, 
                                                              estimator_,
                                                              LocalControllerState.UNDERLOADED);

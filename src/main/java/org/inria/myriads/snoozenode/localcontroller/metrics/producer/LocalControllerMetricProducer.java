@@ -74,8 +74,9 @@ public class LocalControllerMetricProducer extends Thread
                 for ( Metric metric : metrics )
                 {
                     aggregatedMetricData.add(metric);
-                    
                 }
+                
+              //  log_.debug(String.format("Produce : %s",aggregatedMetricData.toString()));
                 
                 metricQueue_.put((AggregatedMetricData) aggregatedMetricData.clone());
                 aggregatedMetricData.clear();

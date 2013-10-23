@@ -28,6 +28,8 @@ import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachin
 import org.inria.myriads.snoozecommon.guard.Guard;
 import org.inria.myriads.snoozenode.groupmanager.estimator.ResourceDemandEstimator;
 import org.inria.myriads.snoozenode.groupmanager.leaderpolicies.comparators.GroupManagerL1Decreasing;
+import org.inria.myriads.snoozenode.groupmanager.managerpolicies.comparators.LocalControllerIncreasingTemperatureLast;
+import org.inria.myriads.snoozenode.groupmanager.managerpolicies.comparators.LocalControllerIncreasingTemperatureAverage;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.comparators.LocalControllerL1Decreasing;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.comparators.LocalControllerL1Increasing;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.comparators.VirtualMachineEuclidDecreasing;
@@ -183,5 +185,40 @@ public final class SortUtils
                 log_.debug("Unknown local controller demand measure selected!");
                 break;
         }
-    }    
+    } 
+    
+    /**
+     * Sort the local controllers by their temperature low to high
+     *  
+     * @param localControllers      The local controller descriptions
+     * @param estimator             The estimator
+     */
+    public static void sortLocalControllersIncreasingTemperature(List<LocalControllerDescription> localControllers,
+                                                      			ResourceDemandEstimator estimator, boolean last)
+    {
+        Guard.check(localControllers, estimator);
+        log_.debug(String.format("Sorting local controllers in decreasing order according to %s norm!", 
+                                  estimator.getSortNorm()));
+        
+        switch (estimator.getSortNorm())
+        {
+            case L1 : 
+            	if (last)
+            	{
+            		log_.debug("Sorting on LAST temperature");
+	                Collections.sort(localControllers, new LocalControllerIncreasingTemperatureLast(estimator));
+	                break;
+            	}
+            	else
+            	{
+            		log_.debug("Sorting on AVERAGE temperature");
+	                Collections.sort(localControllers, new LocalControllerIncreasingTemperatureAverage(estimator));
+	                break;
+            	}
+            
+            default:
+                log_.debug("Unknown local controller demand measure selected!");
+                break;
+        }
+    }   
 }

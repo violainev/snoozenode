@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.submission.VirtualMachineLocation;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.submission.VirtualMachineSubmissionRequest;
@@ -53,7 +54,6 @@ import org.inria.myriads.snoozenode.groupmanager.statemachine.SystemState;
 import org.inria.myriads.snoozenode.groupmanager.statemachine.VirtualMachineCommand;
 import org.inria.myriads.snoozenode.groupmanager.statemachine.api.StateMachine;
 import org.inria.myriads.snoozenode.groupmanager.virtualmachinemanager.VirtualMachineManager;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

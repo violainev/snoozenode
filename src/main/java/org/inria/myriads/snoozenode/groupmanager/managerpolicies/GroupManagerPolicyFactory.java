@@ -32,7 +32,9 @@ import org.inria.myriads.snoozenode.groupmanager.managerpolicies.reconfiguration
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.VirtualMachineRelocation;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl.GreedyOverloadRelocation;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl.GreedyUnderloadRelocation;
+import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl.OverheatRelocation;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl.TestUnstable;
+import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl.UnderloadRelocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,6 +142,16 @@ public final class GroupManagerPolicyFactory
             case TestUnstable : 
                 relocation = new TestUnstable(estimator);
                 break;
+                
+            case UnderloadRelocation :
+                relocation = new UnderloadRelocation(estimator);
+                break;
+
+            case OverheatRelocation :
+                relocation = new OverheatRelocation(estimator);
+                break;
+                
+                
             default :
                 log_.error("Unknown virtual machine relocation policy selected!");
         }

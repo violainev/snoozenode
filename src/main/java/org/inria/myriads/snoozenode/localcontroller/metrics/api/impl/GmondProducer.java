@@ -76,6 +76,7 @@ public class GmondProducer implements MetricProducer
     public List<Metric> getMetric() throws Exception
     {
         List<Metric> metrics = new ArrayList<Metric>();
+        StringBuffer sb = new StringBuffer();
         try{
             socketAddress_ = new InetSocketAddress("localhost", 8649);
             clientSocket_ = new Socket();
@@ -88,6 +89,8 @@ public class GmondProducer implements MetricProducer
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(new InputSource(new ByteArrayInputStream(myString.getBytes("utf-8"))));
             NodeList nList = doc.getElementsByTagName("HOST");
+            
+            
             
             for (int temp = 0; temp < nList.getLength(); temp++) 
             {
@@ -105,10 +108,19 @@ public class GmondProducer implements MetricProducer
                         {
                             Element eMetric = (Element) nMetric;
                             String metricName = eMetric.getAttribute("NAME") ;
+                            
                             if (metrics_.contains(metricName))
                             {
                                 //add metric here
                                 double metricValue = Double.valueOf(eMetric.getAttribute("VAL")); 
+                                if (metricName.equals("cputemperature"))
+                                {
+                                	sb.insert(0, metricValue + " ");
+                                }
+                                else
+                                {
+                                	sb.append(metricValue + " ");
+                                }
                                 metrics.add(new Metric(metricName, metricValue));
                             }
                         }
@@ -121,10 +133,11 @@ public class GmondProducer implements MetricProducer
         catch(Exception exception)
         {
             log_.warn("Unable to parse the gmond xml");
+            log_.warn(String.format("Exception : %s", exception.toString()));
         }
                 
         clientSocket_.close();
-
+        log_.debug(String.format("GMOND: %s",sb.toString()));
         return metrics;
     }
 

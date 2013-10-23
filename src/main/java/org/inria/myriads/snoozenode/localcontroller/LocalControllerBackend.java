@@ -402,6 +402,9 @@ public final class LocalControllerBackend
     {
         boolean isPowerCycled = false;
         
+       // log_.debug("Saving the time before shutdown");
+       // localControllerDescription_.setLastTimeShutdown();
+        
         switch (powerSavingAction)
         {
             case suspendToRam:

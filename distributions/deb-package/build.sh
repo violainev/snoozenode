@@ -22,20 +22,5 @@
 SNOOZE_PACKAGE_NAME="snoozenode"
 SNOOZE_JAR_NAME="uber-snoozenode-1.2.0-SNAPSHOT.jar"
 
-# Update config files
-cp -R ../../configs/framework/quartz.properties $SNOOZE_PACKAGE_NAME/debian/input/configs/
-cp -R ../../configs/framework/snooze_node.cfg $SNOOZE_PACKAGE_NAME/debian/input/configs/
-cp -R ../../configs/framework/log4j.xml $SNOOZE_PACKAGE_NAME/debian/input/configs/
-cp -R ../../configs/init_script/snoozenode $SNOOZE_PACKAGE_NAME/debian/input/init.d/
-cp -R ../../configs/powermanagement/pm-utils-hook/00snoozenode \
-                                    $SNOOZE_PACKAGE_NAME/debian/input/pm-utils/
-
-# Update snooze jar
-cp -R ../../target/$SNOOZE_JAR_NAME $SNOOZE_PACKAGE_NAME/debian/input/snoozenode.jar
-
-# Generate package (with fakeroot)
-export LD_LIBRARY_PATH=/usr/lib/libfakeroot:/usr/lib/x86_64-linux-gnu/libfakeroot/
-export LD_PRELOAD=libfakeroot-sysv.so
-
 cd $SNOOZE_PACKAGE_NAME
 ./rules

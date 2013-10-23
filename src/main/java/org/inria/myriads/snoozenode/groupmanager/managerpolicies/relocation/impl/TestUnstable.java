@@ -20,17 +20,22 @@
 package org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
+import org.inria.myriads.snoozecommon.datastructure.LRUCache;
 import org.inria.myriads.snoozecommon.guard.Guard;
+import org.inria.myriads.snoozecommon.metric.Metric;
 import org.inria.myriads.snoozenode.groupmanager.estimator.ResourceDemandEstimator;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.reconfiguration.ReconfigurationPlan;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.VirtualMachineRelocation;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.utility.RelocationUtility;
 import org.inria.myriads.snoozenode.groupmanager.managerpolicies.util.SortUtils;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,13 +76,18 @@ public final class TestUnstable
                                                  List<LocalControllerDescription> destinationLocalControllers)
     {
         Guard.check(sourceLocalController, destinationLocalControllers);
-        log_.debug(String.format("Starting to compute the migration plan for local controller: %s", 
-                                 sourceLocalController.getId()));
+        
+        log_.debug(String.format("Starting to compute the migration plan for local controller: %s (%s)", 
+                                 sourceLocalController.getHostname(),sourceLocalController.getId()));
                 
         List<VirtualMachineMetaData> candidatevirtualMachines = 
             new ArrayList<VirtualMachineMetaData>(sourceLocalController.getVirtualMachineMetaData().values());
         SortUtils.sortVirtualMachinesDecreasing(candidatevirtualMachines, estimator_);
-        SortUtils.sortLocalControllersDecreasing(destinationLocalControllers, estimator_);
+        
+      
+        SortUtils.sortLocalControllersIncreasingTemperature(destinationLocalControllers, estimator_, false);
+
+        
         ReconfigurationPlan reconfigurationPlan = 
                 RelocationUtility.computeReconfigurationPlan(candidatevirtualMachines,
                                                              destinationLocalControllers, 

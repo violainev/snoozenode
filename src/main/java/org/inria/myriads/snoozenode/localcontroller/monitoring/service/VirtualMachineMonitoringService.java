@@ -156,7 +156,7 @@ public final class VirtualMachineMonitoringService
             LocalControllerMetricsSettings localControllerMetricsSettings) throws Exception
     {
         MonitoringThresholds thresholds = monitoring_.getMonitoringSettings().getThresholds();
-        log_.debug("Starting the virtual machine heartbeat producer");
+        log_.debug("Starting the metrics service");
         metricsProducer_ = 
                 new LocalControllerMetricProducer(localControllerMetricsSettings_,
                             metricQueue_);

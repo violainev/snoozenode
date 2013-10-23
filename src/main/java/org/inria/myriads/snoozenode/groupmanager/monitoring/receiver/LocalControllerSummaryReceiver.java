@@ -24,10 +24,10 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import org.inria.myriads.snoozecommon.communication.NetworkAddress;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.guard.Guard;
 import org.inria.myriads.snoozenode.database.api.GroupManagerRepository;
 import org.inria.myriads.snoozenode.groupmanager.statemachine.api.StateMachine;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
 import org.inria.myriads.snoozenode.localcontroller.monitoring.transport.LocalControllerDataTransporter;
 import org.inria.myriads.snoozenode.tcpip.DataListener;
 import org.inria.myriads.snoozenode.tcpip.TCPDataReceiver;

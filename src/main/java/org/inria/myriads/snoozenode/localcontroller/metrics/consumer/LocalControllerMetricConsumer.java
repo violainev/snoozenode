@@ -30,6 +30,7 @@ import java.util.concurrent.BlockingQueue;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.inria.myriads.snoozecommon.communication.NetworkAddress;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.datastructure.LRUCache;
 import org.inria.myriads.snoozecommon.guard.Guard;
 import org.inria.myriads.snoozecommon.metric.Metric;
@@ -114,19 +115,27 @@ public final class LocalControllerMetricConsumer
                 
         
         LocalControllerDataTransporter localControllerData = 
-            new LocalControllerDataTransporter(localControllerId_, null,metricDataClone);
+            new LocalControllerDataTransporter(localControllerId_, null, metricDataClone);
         
+        //log_.debug("VV: Calling detectMetricThresholdCrossing...");
         boolean isDetected = crossingDetector_.detectMetricThresholdCrossing(localControllerData);
         if (!isDetected)
         {
             log_.debug("No threshold crossing detected! Node seems stable for now!");
         }
+        else
+        {
+            log_.debug(String.format("Oh! Threshold crossing detected! %s", localControllerData.getState()));
+        }
     
-        ObjectMapper mapper = new ObjectMapper();
+        /*ObjectMapper mapper = new ObjectMapper();
         StringWriter s = new StringWriter();
         mapper.writeValue(s, localControllerData);
-        log_.debug(s.toString());
-        log_.debug("Sending aggregated metrics");
+        log_.debug(s.toString());*/
+    
+        log_.debug("Sending aggregated metrics :");
+        log_.debug(metricDataClone.toString());
+        
         globalQueue_.add(localControllerData);
     }
     
@@ -163,10 +172,10 @@ public final class LocalControllerMetricConsumer
         } 
         catch (InterruptedException exception)
         {
-            log_.error("Virtual machine monitoring data consumer thread was interruped", exception);
+            log_.error("Local controller metric data consumer thread was interruped", exception);
         }  
         
-        log_.debug("Virtual machine monitoring data consumer stopped!");
+        log_.debug("Local controller metric data consumer stopped!");
     }
     
 
@@ -175,7 +184,7 @@ public final class LocalControllerMetricConsumer
      */
     public void terminate()
     {
-        log_.debug("Terminating the virtual machine monitoring data consumer");
+        log_.debug("Terminating the local controller metric data consumer");
         isTerminated_ = true;
         //aclose();
     }

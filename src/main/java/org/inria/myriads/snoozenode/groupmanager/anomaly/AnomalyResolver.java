@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerStatus;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
 import org.inria.myriads.snoozecommon.guard.Guard;
@@ -38,7 +39,6 @@ import org.inria.myriads.snoozenode.groupmanager.managerpolicies.relocation.Virt
 import org.inria.myriads.snoozenode.groupmanager.migration.MigrationPlanEnforcer;
 import org.inria.myriads.snoozenode.groupmanager.migration.listener.MigrationPlanListener;
 import org.inria.myriads.snoozenode.groupmanager.statemachine.api.StateMachine;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +61,9 @@ public final class AnomalyResolver
     
     /** Unstable relocation policy (extra metrics). */
     private VirtualMachineRelocation unstableRelocationPolicy_;
+
+    /** Overheat relocation policy */
+    private VirtualMachineRelocation overheatRelocationPolicy_;
     
     /** The group manager repository. */
     private GroupManagerRepository groupManagerRepository_;
@@ -98,6 +101,10 @@ public final class AnomalyResolver
                                                                   resourceDemandEstimator);
         unstableRelocationPolicy_ = 
                 GroupManagerPolicyFactory.newVirtualMachineRelocation(relocationPolicies.getUnstablePolicy(),
+                        resourceDemandEstimator);
+
+        overheatRelocationPolicy_ = 
+                GroupManagerPolicyFactory.newVirtualMachineRelocation(relocationPolicies.getOverheatPolicy(),
                         resourceDemandEstimator);
         
         numberOfMonitoringEntries_ = resourceDemandEstimator.getNumberOfMonitoringEntries();
@@ -137,6 +144,12 @@ public final class AnomalyResolver
                 relocationPlan = unstableRelocationPolicy_.relocateVirtualMachines(anomalyLocalController,
                         destinationLocalControllers);
                 break;
+                
+            case OVERHEATED: 
+                relocationPlan = overheatRelocationPolicy_.relocateVirtualMachines(anomalyLocalController,
+                        destinationLocalControllers);
+                break;
+                
             default:
                 log_.error(String.format("Unsupported state: %s", localControllerState));
                 break;     
@@ -156,7 +169,7 @@ public final class AnomalyResolver
         log_.debug(String.format("Returning %s local controllers", state));
         
         List<LocalControllerDescription> destination;
-        if (state.equals(LocalControllerState.OVERLOADED))
+        if (state.equals(LocalControllerState.OVERLOADED) || state.equals(LocalControllerState.OVERHEATED))
         {
             log_.debug("Getting all local controllers (including PASSIVE)");
             destination = groupManagerRepository_.getLocalControllerDescriptions(numberOfMonitoringEntries_, false);    
@@ -224,6 +237,10 @@ public final class AnomalyResolver
         
         MigrationPlanEnforcer migrationPlanExecutor = new MigrationPlanEnforcer(groupManagerRepository_, this);
         migrationPlanExecutor.enforceMigrationPlan(migrationPlan);
+        
+     ///   log_.debug("_STATE_ = STABLE");
+     ///      LocalControllerDescription lcd = groupManagerRepository_.getLocalControllerDescription(localControllerId, 10);
+     ///      lcd.setState(LocalControllerState.STABLE);
     }
     
     /**

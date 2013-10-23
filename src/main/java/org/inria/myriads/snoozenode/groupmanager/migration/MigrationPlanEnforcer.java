@@ -142,6 +142,10 @@ public final class MigrationPlanEnforcer
             return false;
         }
         
+        log_.debug(String.format("MigrationInfo : SuccessfulMigration of %s from %s to %s",
+        		virtualMachineId,
+        		migrationRequest.getSourceVirtualMachineLocation().getLocalControllerControlDataAddress(),
+        		migrationRequest.getDestinationVirtualMachineLocation().getLocalControllerControlDataAddress()));
         return true;
     }
     
@@ -241,7 +245,7 @@ public final class MigrationPlanEnforcer
      */
     private void startMigration(MigrationRequest migrationRequest) 
     {    
-        log_.debug(String.format("Starting to migrate virtual machine %s from local controller %s:%d to %s:%d",
+        log_.debug(String.format("MigrationInfo : Starting to migrate virtual machine %s from local controller %s:%d to %s:%d",
             migrationRequest.getSourceVirtualMachineLocation().getVirtualMachineId(),
             migrationRequest.getSourceVirtualMachineLocation().getLocalControllerControlDataAddress().getAddress(), 
             migrationRequest.getSourceVirtualMachineLocation().getLocalControllerControlDataAddress().getPort(), 

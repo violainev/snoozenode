@@ -26,6 +26,7 @@ import java.util.Map;
 import org.inria.myriads.snoozecommon.communication.NetworkAddress;
 import org.inria.myriads.snoozecommon.communication.groupmanager.GroupManagerDescription;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerStatus;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.status.VirtualMachineStatus;
@@ -76,6 +77,12 @@ public interface GroupManagerRepository
      */
     LocalControllerDescription getLocalControllerDescription(String localControllerId, int numberOfMonitoringEntries);
        
+    
+    /**
+     * Updates the state of the LC
+     */
+    void setLocalControllerDescriptionState(String localControllerId,int numberOfMonitoringEntries,LocalControllerState state);
+    
     /** 
      * Adds local controller description. 
      * 

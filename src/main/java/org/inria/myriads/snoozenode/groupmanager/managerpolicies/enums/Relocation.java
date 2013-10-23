@@ -31,5 +31,10 @@ public enum Relocation
     /** Underload relocation. */
     GreedyUnderloadRelocation, 
     /** TestUnstable. */
-    TestUnstable
+    TestUnstable,
+    /** Overheat relocation. */
+    OverheatRelocation,
+    /** Underload relocation. */
+    UnderloadRelocation
+    
 }

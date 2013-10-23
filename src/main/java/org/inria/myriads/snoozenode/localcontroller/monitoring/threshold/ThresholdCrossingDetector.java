@@ -20,6 +20,7 @@
 package org.inria.myriads.snoozenode.localcontroller.monitoring.threshold;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import org.inria.myriads.snoozecommon.util.MathUtils;
 import org.inria.myriads.snoozenode.configurator.localcontrollermetrics.LocalControllerMetricsSettings;
 import org.inria.myriads.snoozenode.configurator.monitoring.MonitoringThresholds;
 import org.inria.myriads.snoozenode.localcontroller.metrics.transport.AggregatedMetricData;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozenode.localcontroller.monitoring.transport.AggregatedVirtualMachineData;
 import org.inria.myriads.snoozenode.localcontroller.monitoring.transport.LocalControllerDataTransporter;
 import org.inria.myriads.snoozenode.util.ThresholdUtils;
@@ -160,7 +161,7 @@ public final class ThresholdCrossingDetector
             monitoringData.setState(LocalControllerState.UNDERLOADED);
             return true;
         }
-        
+
         return false;        
     }
     
@@ -284,23 +285,81 @@ public final class ThresholdCrossingDetector
 
     public boolean detectMetricThresholdCrossing(LocalControllerDataTransporter localControllerData)
     {
-        //compute avg metrics utilization 
+    	log_.debug("detectMetricThresholdCrossing...");
+    	
         Map<String, Double> averageMetricMap = computeAverageMetricsUtilization(localControllerData.getMetricData());
-        // compare with threshold
+     //   Map<String, Double> lastValueMetricMap = getLastValue(localControllerData.getMetricData());
         Map<String, List<Double>> thresholds = localControllerMetricsSettings_.getThresholds();
         
-        for (Entry<String, List<Double>> threshold : thresholds.entrySet())
+        /*** CPU TEMP ***/
+        List<Double> thresholdsTemp = thresholds.get("cputemperature");
+        Double averageTemperatureValue = averageMetricMap.get("cputemperature");
+    //    Double lastTemperatureValue = lastValueMetricMap.get("cputemperature");
+        
+        log_.debug(String.format("Test Temperature : if  %f > %f",
+        		averageTemperatureValue,
+        		ThresholdUtils.getMaxThreshold(thresholdsTemp)));
+        
+        /*
+        if ( lastTemperatureValue != null 
+        		&& lastTemperatureValue > ThresholdUtils.getMaxThreshold(thresholdsTemp))
+        
+         if ( averageTemperatureValue != null && lastTemperatureValue != null
+        		&& averageTemperatureValue > ThresholdUtils.getMaxThreshold(thresholdsTemp)
+        		&& lastTemperatureValue > ThresholdUtils.getMaxThreshold(thresholdsTemp) )
+        */
+        
+        if ( averageTemperatureValue != null
+     		&& averageTemperatureValue > ThresholdUtils.getMaxThreshold(thresholdsTemp))
         {
-            String thresholdMetricName = threshold.getKey();
-            List<Double> thresholdMetricValue = threshold.getValue();
-            if (averageMetricMap.get(thresholdMetricName) != null && 
-                    averageMetricMap.get(thresholdMetricName) > ThresholdUtils.getMaxThreshold(thresholdMetricValue))
-            {
-             localControllerData.setState(LocalControllerState.UNSTABLE);
+             localControllerData.setState(LocalControllerState.OVERHEATED);
              return true;   
-            }
         }
+        
+        /*** CPU LOAD ***/
+        List<Double> thresholdsCpu = thresholds.get("cpu_user");
+        Double averageCpuValue = averageMetricMap.get("cpu_user");
+     //   Double lastCpuValue = lastValueMetricMap.get("cpu_user");
+        
+        log_.debug(String.format("Test CPU : if  %f < %f",
+        		averageCpuValue,
+        		ThresholdUtils.getMinThreshold(thresholdsCpu)));
+        
+        /*   
+     	if (averageCpuValue != null && lastCpuValue != null
+        	&& averageCpuValue > ThresholdUtils.getMaxThreshold(thresholdsCpu)
+        	&& averageCpuValue > ThresholdUtils.getMaxThreshold(thresholdsCpu))
+ 		
+ 		if (lastCpuValue != null
+        	&& lastCpuValue < ThresholdUtils.getMinThreshold(thresholdsCpu))
+        */
+        
+        if (averageCpuValue != null
+        		&& averageCpuValue < ThresholdUtils.getMinThreshold(thresholdsCpu))
+        {
+        	
+        	localControllerData.setState(LocalControllerState.UNDERLOADED);
+             return true;   
+        }
+        
+        localControllerData.setState(LocalControllerState.STABLE);
         return false;
+    }
+
+    private Map<String,Double> getLastValue(AggregatedMetricData metricData)
+    {
+        Map<String, Double> lastValueMetricMap = new HashMap<String, Double>();
+        for (Entry<String, LRUCache<Long, Metric>> entry : metricData.getMetricData().entrySet())
+        {
+            String metricName = entry.getKey();
+            Double lastMetric = 0d;
+            for (Metric metric : entry.getValue().values())
+            {
+            	lastMetric = metric.getValue();
+            }
+            lastValueMetricMap.put(metricName, lastMetric);
+        }
+        return lastValueMetricMap;
     }
     
     private Map<String,Double> computeAverageMetricsUtilization(AggregatedMetricData metricData)

@@ -24,10 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.datastructure.LRUCache;
 import org.inria.myriads.snoozecommon.metric.Metric;
 import org.inria.myriads.snoozenode.localcontroller.metrics.transport.AggregatedMetricData;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
 
 /**
  * Aggregated virtual machine monitoring data.
@@ -41,7 +41,7 @@ public final class LocalControllerDataTransporter
     private static final long serialVersionUID = 1L;
 
     /** Local controller state. */
-    private LocalControllerState state_ = LocalControllerState.STABLE;
+    private LocalControllerState state_  = LocalControllerState.NULL;
     
     /** Local controller identifier. */
     private String localControllerId_;
@@ -68,7 +68,6 @@ public final class LocalControllerDataTransporter
         localControllerId_ = localControllerId;
         aggregatedData_ = aggregatedData;
         metricData_ = metricData;
-        
     }
 
     /**

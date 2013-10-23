@@ -33,6 +33,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.inria.myriads.snoozecommon.communication.NetworkAddress;
 import org.inria.myriads.snoozecommon.communication.groupmanager.GroupManagerDescription;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerStatus;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.VirtualMachineMetaData;
 import org.inria.myriads.snoozecommon.communication.virtualcluster.monitoring.VirtualMachineMonitoringData;
@@ -292,7 +293,27 @@ public final class GroupManagerMemoryRepository
                                                                                         numberOfMonitoringEntries);
         return localControllerCopy;
     }
+
     
+    /**
+     * Returns the local controller description.
+     * 
+     * @param localControllerId         The local controller identifier
+     * @param numberOfMonitoringEntries The number of monitoring entries
+     * @return                          The local controller description
+     */
+   @Override
+    public synchronized void setLocalControllerDescriptionState(String localControllerId,
+    															int numberOfMonitoringEntries,
+    															LocalControllerState state)
+    {
+        Guard.check(localControllerId, state);       
+        
+        LocalControllerDescription lcd = this.getLocalControllerDescription(localControllerId, numberOfMonitoringEntries);
+        lcd.setState(state);
+        
+        localControllerDescriptions_.put(localControllerId, lcd);
+    }
     /**
      * Removes virtual machine meta data mapping.
      * 

@@ -103,4 +103,20 @@ public class AggregatedMetricData implements Cloneable, Serializable
         
     }
     
+    @Override
+    public String toString()
+    {
+    	StringBuffer sb = new StringBuffer();
+    	 for ( Entry<String, LRUCache<Long, Metric>> entry  : metricData_.entrySet())
+         {
+    		 sb.append("\n* " + entry.getKey() + " * : {");
+    		 LRUCache<Long, Metric> metrics = entry.getValue();
+    		 for ( Entry<Long,Metric> ent : metrics.entrySet() )
+    		 {
+    			 sb.append("  " + ent.getKey() + " -> " + ent.getValue() + "  ");
+    		 }
+    		 sb.append("}");
+         }	
+    	 return sb.toString();
+    }
 }

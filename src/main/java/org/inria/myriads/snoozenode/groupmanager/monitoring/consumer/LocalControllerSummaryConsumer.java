@@ -21,9 +21,10 @@ package org.inria.myriads.snoozenode.groupmanager.monitoring.consumer;
 
 import java.util.concurrent.BlockingQueue;
 
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerDescription;
+import org.inria.myriads.snoozecommon.communication.localcontroller.LocalControllerState;
 import org.inria.myriads.snoozenode.database.api.GroupManagerRepository;
 import org.inria.myriads.snoozenode.groupmanager.statemachine.api.StateMachine;
-import org.inria.myriads.snoozenode.localcontroller.monitoring.enums.LocalControllerState;
 import org.inria.myriads.snoozenode.localcontroller.monitoring.transport.LocalControllerDataTransporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,24 +78,46 @@ public final class LocalControllerSummaryConsumer
         try
         {
             while (true)
-            {                            
+            {             
                 LocalControllerDataTransporter monitoringData = dataQueue_.take();   
                 String localControllerId = monitoringData.getLocalControllerId();
-                if (monitoringData.getData()!=null)
+                
+                LocalControllerDescription lcd = repository_.getLocalControllerDescription(localControllerId, 10);
+                
+               if (lcd != null)
+                {
+	                LocalControllerState lcState = monitoringData.getState();
+	            	
+	                if (!lcState.equals(LocalControllerState.NULL))
+	                {
+	                	repository_.setLocalControllerDescriptionState(localControllerId, 10, lcState);
+	                	log_.debug(String.format("LC %s _STATE_ = %s",lcd.getHostname(), lcState));
+	                }
+	               else
+	               {
+	            	   log_.debug("Ignoring NULL state");
+	               }
+                }
+            
+                if (monitoringData.getData()!= null)
                 {
                     repository_.addAggregatedMonitoringData(localControllerId, monitoringData.getData());
                 }
                 
-                if (monitoringData.getMetricData()!=null && monitoringData.getMetricData().getMetricData().size()>0)
+                if (monitoringData.getMetricData()!= null && monitoringData.getMetricData().getMetricData().size()>0)
                 {
                     repository_.addMetricData(localControllerId, monitoringData.getMetricData());
                 }
                 
-                boolean isStable = monitoringData.getState().equals(LocalControllerState.STABLE);                
+                boolean isStable = ( monitoringData.getState().equals(LocalControllerState.STABLE) || monitoringData.getState().equals(LocalControllerState.NULL));                
                 if (!isStable)
                 {
                     log_.debug("Anomaly on local controller detected!");           
                     stateMachine_.resolveAnomaly(localControllerId, monitoringData.getState());
+                }
+                else
+                {
+                    log_.debug("Local controller stable...");
                 }
             }
         }
